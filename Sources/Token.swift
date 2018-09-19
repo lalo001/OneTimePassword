@@ -61,6 +61,16 @@ public struct Token: Equatable {
         let currentTime = Date()
         return try? generator.password(at: currentTime)
     }
+    
+    /// Calculates the current untruncated password based on the token's generator. The password generated will
+    /// be consistent for a counter-based token, but for a timer-based token the password will
+    /// depend on the current time when this property is accessed.
+    ///
+    /// - returns: The current untruncated password, or `nil` if a password could not be generated.
+    public var currentUntruncatedPassword: String? {
+        let currentTime = Date()
+        return try? generator.untruncatedPassword(at: currentTime)
+    }
 
     // MARK: Update
 

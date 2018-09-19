@@ -107,6 +107,28 @@ public struct Generator: Equatable {
         // Pad the string representation with zeros, if necessary
         return String(truncatedHash).padded(with: "0", toLength: digits)
     }
+    
+    /// Generates the untruncated password for the given point in time.
+    ///
+    /// - parameter time: The target time, represented as a `Date`.
+    ///                   The time must not be before the Unix epoch.
+    ///
+    /// - throws: A `Generator.Error` if a valid password cannot be generated for the given time.
+    /// - returns: The generated password, or throws an error if a password could not be generated.
+    public func untruncatedPassword(at time: Date) throws -> String {
+        try Generator.validateDigits(digits)
+
+        let counter = try factor.counterValue(at: time)
+        // Ensure the counter value is big-endian
+        var bigCounter = counter.bigEndian
+
+        // Generate an HMAC value from the key and counter
+        let counterData = Data(bytes: &bigCounter, count: MemoryLayout<UInt64>.size)
+        let hash = HMAC(algorithm: algorithm, key: secret, data: counterData)
+        let base64String = hash.base64EncodedString()
+        
+        return base64String    
+    }
 
     // MARK: Update
 
